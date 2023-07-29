@@ -14,7 +14,26 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
+model Tweet {
+    id          String   @id @default(cuid())
+    content     String
+    authorId    String
+    likes       Like[]
+    author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+}
 
+model Like{
+    tweetId     String
+    authorId    String
+    tweet       Tweet    @relation(fields: [tweetId], references: [id] , onDelete: Cascade)
+    author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    @@id([tweetId, authorId])
+}
 
 // Necessary for Next auth
 model Account {
@@ -51,6 +70,12 @@ model User {
     image         String?
     accounts      Account[]
     sessions      Session[]
+    tweets        Tweet[]
+    likes         Like[]
+    followers    User[]    @relation(name: "FollowRelation")
+    following    User[]    @relation(name: "FollowRelation")
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @updatedAt
 }
 
 model VerificationToken {
