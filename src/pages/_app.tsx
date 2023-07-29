@@ -5,6 +5,8 @@ import { api } from "~/utils/api";
 import "~/styles/globals.css";
 import Head from "next/head";
 import SideNav from "~/components/shared/SideNav";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const MyApp: AppType<{ session: Session | null }> = ({
   Component,
@@ -22,6 +24,18 @@ const MyApp: AppType<{ session: Session | null }> = ({
         <div className="min-h-screen flex-grow border-x">
           <Component {...pageProps} />
         </div>
+        <ToastContainer
+          position="bottom-center"
+          autoClose={2000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss={false}
+          draggable={false}
+          pauseOnHover={true}
+          theme="light"
+        />
       </div>
     </SessionProvider>
   );
