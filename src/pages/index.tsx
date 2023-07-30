@@ -1,3 +1,4 @@
+import { toast } from "react-toastify";
 import NewTweetForm from "~/components/home/NewTweetForm";
 import { InfiniteTweetList } from "~/components/shared/InfiniteTweetList";
 import { api } from "~/utils/api";
@@ -7,6 +8,9 @@ export default function Home() {
     {},
     {
       getNextPageParam: (lastPage) => lastPage.nextCursor,
+      onError: (err) => {
+        toast.error(err.message);
+      },
     }
   );
   return (
@@ -17,6 +21,9 @@ export default function Home() {
       <NewTweetForm />
       <InfiniteTweetList
         tweets={recentTweets.data?.pages.flatMap((page) => page.tweets)}
+        hasMore={Boolean(recentTweets.hasNextPage)}
+        fetchNextPage={recentTweets.fetchNextPage}
+        isLoading={recentTweets.isFetching}
       />
     </>
   );

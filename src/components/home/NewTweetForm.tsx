@@ -9,6 +9,7 @@ function NewTweetForm() {
   const [inputValue, setInputValue] = useState("");
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const session = useSession();
+  const trpcUtils = api.useContext();
 
   useLayoutEffect(() => {
     const textArea = textAreaRef.current;
@@ -19,9 +20,39 @@ function NewTweetForm() {
 
   const { isSuccess, data, isError, error, mutate } =
     api.tweet.createTweet.useMutation({
-      onSuccess: () => {
+      onSuccess: (newTweet) => {
         setInputValue("");
         toast.success("Tweeted successfully");
+        trpcUtils.tweet.infiniteFeed.setInfiniteData({}, (oldData) => {
+          if (
+            oldData == null ||
+            oldData.pages[0] == null ||
+            session.status !== "authenticated"
+          )
+            return;
+
+          const newCacheTweet = {
+            ...newTweet,
+            likeCount: 0,
+            likedByMe: false,
+            user: {
+              id: session.data.user.id,
+              name: session.data.user.name || null,
+              image: session.data.user.image || null,
+            },
+          };
+
+          return {
+            ...oldData,
+            pages: [
+              {
+                ...oldData.pages[0],
+                tweets: [newCacheTweet, ...oldData.pages[0].tweets],
+              },
+              ...oldData.pages.slice(1),
+            ],
+          };
+        });
       },
       onError: (err) => {
         toast.error(err.message);
